@@ -1,7 +1,7 @@
 .DS_Store
 services/frontend/node_modules
 services/frontend/dist
-services/backend/reports
+services/backend/reports/
 
 
 # local env files
