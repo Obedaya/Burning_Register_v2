@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+
+  frontend:
+    build: ./services/frontend
+    volumes:
+      - './services/frontend:/app'
+      - '/app/node_modules'
+    ports:
+      - 8080:8080
