@@ -31,3 +31,21 @@ async def add_history(_id: str, iscancled: bool = True) -> dict:
     history.iscancled = iscancled
     await history.save()
     return {"message": "History updated successfully", "data": history}
+
+# Get total of all not cancelled histories for specific movie
+@router.get("/total", response_description="Total of all histories for specific movie")
+async def get_total(movie: str) -> float:
+    history = await History.find({"movie": movie, "cancellation": False}).to_list()
+    total = 0
+    for i in history:
+        total += i.total
+    return float(total)
+
+# Get total of only not cancelled histories with isteam = true of all histories for specific movie
+@router.get("/total/team", response_description="Total of all team histories for specific movie")
+async def get_total(movie: str) -> float:
+    history = await History.find({"movie": movie, "cancellation": False, "isteam": True}).to_list()
+    total = 0
+    for i in history:
+        total += i.total
+    return float(total)
