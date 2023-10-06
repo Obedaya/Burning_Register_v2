@@ -34,18 +34,38 @@ async def add_history(_id: str, iscancled: bool = True) -> dict:
 
 # Get total of all not cancelled histories for specific movie
 @router.get("/total", response_description="Total of all histories for specific movie")
-async def get_total(movie: str) -> float:
-    history = await History.find({"movie": movie, "cancellation": False}).to_list()
+async def get_total(movie: str, isteam: bool = False, cancellation: bool = False, pfand: bool = True) -> float:
+    if cancellation is False:
+        if isteam is True:
+            history = await History.find({"movie": movie, "cancellation": False, "isteam": True}).to_list()
+        else:
+            history = await History.find({"movie": movie, "cancellation": False}).to_list()
+    else:
+        history = await History.find({"movie": movie, "cancellation": True}).to_list()
     total = 0
     for i in history:
         total += i.total
+    if pfand is False:
+        for i in history:
+            for j in i.products:
+                if j.name == "Pfand":
+                    total -= j.price * j.amount
     return float(total)
 
-# Get total of only not cancelled histories with isteam = true of all histories for specific movie
-@router.get("/total/team", response_description="Total of all team histories for specific movie")
-async def get_total(movie: str) -> float:
-    history = await History.find({"movie": movie, "cancellation": False, "isteam": True}).to_list()
+# Get total amount of Tickets sold for specific movie
+@router.get("/tickets", response_description="Total of all tickets for specific movie")
+async def get_tickets(movie: str, isteam: bool = False, freeticket: bool = False) -> int:
+    if isteam is True:
+        history = await History.find({"movie": movie, "cancellation": False, "isteam": True}).to_list()
+    else:
+        history = await History.find({"movie": movie, "cancellation": False, "isteam": False}).to_list()
     total = 0
     for i in history:
-        total += i.total
-    return float(total)
+        for j in i.products:
+            if freeticket is False:
+                if j.name == "Ticket":
+                    total += j.amount
+            else:
+                if j.name == "Freiticket":
+                    total += j.amount
+    return total

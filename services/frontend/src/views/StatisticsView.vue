@@ -35,9 +35,15 @@
           <v-card-title>Statistics</v-card-title>
           <v-card-text>
             <h4>Total Sold:</h4>
-            <p>{{ calculateTotalAmount() }}</p>
+            {{ total_sold }}€
             <h4>Total Sold to the Team:</h4>
-            <p>{{ calulateTotalAmountTeam() }}</p>
+            {{ total_sold_team }}€
+            <h4>Total Sold without Pfand:</h4>
+            {{ total_sold_without_pfand }}€
+            <h4>Tickets Sold:</h4>
+            {{ tickets_sold }}x
+            <h4>Tickets Sold to the Team:</h4>
+            {{ tickets_sold_team }}x
           </v-card-text>
         </v-card>
       </v-col>
@@ -45,7 +51,7 @@
   </v-container>
 </template>
   
-  <script>
+<script>
 import axios from "axios";
 
 export default {
@@ -60,77 +66,121 @@ export default {
           room: "J007",
         },
       ],
-      history: [
-        {
-          _id: "1",
-          timestamp: "2023-06-14T19:30:00.000+00:00",
-          total: 100,
-          isTeam: false,
-          movie: "Movie",
-          cancellation: false,
-          products: [],
-        },
-        {
-          _id: "2",
-          timestamp: "2023-06-14T19:30:00.000+00:00",
-          total: 50,
-          isTeam: false,
-          movie: "Movie",
-          cancellation: false,
-          products: [],
-        },
-      ],
+      total_sold: 0,
+      total_sold_team: 0,
+      total_sold_without_pfand: 0,
+      tickets_sold: 0,
+      tickets_sold_team: 0,
     };
   },
   methods: {
-    getMovies() {
-      // Implement logic to fetch movies from the backend
-      axios
-        .get("/api/v1/movies/", {
+    async getMovies() {
+      try {
+        const response = await axios.get("/api/v1/movies/", {
           withCredentials: false, // Ensure credentials are not sent
-        })
-        .then((response) => {
-          // Handle success
-          this.movies = response.data;
-        })
-        .catch((error) => {
-          // Handle errors
-          console.log(error);
         });
+        this.movies = response.data;
+      } catch (error) {
+        console.error(error);
+      }
     },
-    getHistory() {
-      console.log(this.selectedMovie);
-      axios
-        .get("/api/v1/history/?movie=" + this.selectedMovie.name, {
-          withCredentials: false, // Ensure credentials are not sent
-        })
-        .then((response) => {
-          // Handle success
-          this.history = response.data;
-        })
-        .catch((error) => {
-          // Handle errors
-          console.log(error);
-        });
+    async getTotal() {
+      try {
+        const response = await this.getTotalInfo(
+          this.selectedMovie.name,
+          false,
+          false,
+          false
+        );
+        this.total_sold = response;
+      } catch (error) {
+        console.error(error);
+      }
     },
-    setSelectedMovie() {
-      this.getHistory();
+    async getTotalTeam() {
+      try {
+        const response = await this.getTotalInfo(
+          this.selectedMovie.name,
+          true,
+          false,
+          false
+        );
+        this.total_sold_team = response;
+      } catch (error) {
+        console.error(error);
+      }
     },
-    calculateTotalAmount() {
-      return this.history.reduce((total, entry) => {
-        if (!entry.isTeam && !entry.cancellation) {
-          total += entry.total;
-        }
-        return total;
-      }, 0);
+    async getTotalWithoutPfand() {
+      try {
+        const response = await this.getTotalInfo(
+          this.selectedMovie.name,
+          false,
+          false,
+          true
+        );
+        this.total_sold_without_pfand = response;
+      } catch (error) {
+        console.error(error);
+      }
     },
-    calulateTotalAmountTeam(){
-      return this.history.reduce((total, entry) => {
-        if (entry.isTeam && !entry.cancellation) {
-          total += entry.total;
-        }
-        return total;
-      }, 0);
+    async getTickets() {
+      try {
+        const response = await this.getTicketInfo(
+          this.selectedMovie.name,
+          false,
+          false,
+          true
+        );
+        this.tickets_sold = response;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async getTicketsTeam() {
+      try {
+        const response = await this.getTicketInfo(
+          this.selectedMovie.name,
+          true,
+          false,
+          true
+        );
+        this.tickets_sold_team = response;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async getTotalInfo(movie, isteam, cancellation, pfand) {
+      try {
+        const response = await axios.get(
+          `/api/v1/history/total?movie=${movie}&isteam=${isteam}&cancellation=${cancellation}&pfand=${pfand}`,
+          {
+            withCredentials: false, // Ensure credentials are not sent
+          }
+        );
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async getTicketInfo(movie, isteam, freeticket) {
+      try {
+        const response = await axios.get(
+          `/api/v1/history/tickets?movie=${movie}&isteam=${isteam}&freeticket=${freeticket}`,
+          {
+            withCredentials: false, // Ensure credentials are not sent
+          }
+        );
+        return response.data;
+      } catch (error) {
+        console.error(error);
+      }
+    },
+    async setSelectedMovie() {
+      await this.getTotal();
+      await this.getTotalTeam();
+      await this.getTotalWithoutPfand();
+      await this.getTickets();
+      await this.getTicketsTeam();
     },
   },
   created() {
@@ -138,15 +188,14 @@ export default {
   },
   watch: {
     selectedMovie(newMovie, oldMovie) {
-      // This function will be called whenever selectedMovie changes
       if (newMovie !== oldMovie) {
-        // Call your API function here
-        this.getHistory();
+        this.setSelectedMovie();
       }
     },
   },
 };
 </script>
+
   
   <style scoped>
 </style>
