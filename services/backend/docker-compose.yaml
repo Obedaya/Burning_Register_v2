@@ -1,27 +1,25 @@
----
-version: "3"
+version: "3.9"
 services:
-  app:
-    image: ghcr.io/obedaya/burning_register:latest
-    ports:
-      - 8501:8501
-    environment:
-      - MONGO_PASSWORD=your_mongo_password
-      - MONGO_URL=your_mongo_url
-      - MONGO_DATABASE_NAME=your_mongo_database_name
-      - PREAUTHMAIL=your_preauthmail
-      - ADMINUSERS=your_adminusers
-    # Add any additional configuration for the app service
+    db:  # This service name will be also used as hostname for MONGODB_URI
+      image: mongo:7.0.2
+      env_file:
+        - .env
+      ports:
+        - "27017:27017"
+      volumes:
+        - mongodb-data:/data/db
+      restart: always
 
-  database:
-    image: mongo
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=root
-      - MONGO_INITDB_ROOT_PASSWORD=your_root_password
-    volumes:
-      - ./data:/data/db
-    # Add any additional configuration for the database service
+    burningbackend:
+        build:
+            context: ./
+        depends_on:
+            - db
+        env_file:
+            - .env
+        ports:
+            - ${UVICORN_PORT}:${UVICORN_PORT}
+        restart: always
 
-  # Add more services as needed
-
-# Add any additional configurations at the root level
+volumes:
+  mongodb-data:
