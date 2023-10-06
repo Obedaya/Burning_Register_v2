@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: list[str] = ["http://localhost:8080"]
     USE_CORRELATION_ID: bool = True
 
-    UVICORN_HOST: str = "127.0.0.1"
+    UVICORN_HOST: str = "0.0.0.0"
     UVICORN_PORT: int = 8080
 
     # Logging

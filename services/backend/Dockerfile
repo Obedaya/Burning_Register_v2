@@ -1,27 +1,37 @@
-# Use a Python base image
-FROM python:3.9-slim
+FROM python:3.11.3-slim as builder
 
-# Set environment variables
-ENV MONGO_PASSWORD="your_mongo_password"
-ENV MONGO_URL="your_mongo_url"
-ENV MONGO_DATABASE_NAME="your_mongo_database_name"
-ENV PREAUTHMAIL="your_preauthmail"
-ENV ADMINUSERS="your_adminusers"
+# Environment variables necessary for Poetry installation
+ENV POETRY_HOME="/opt/poetry"
+ENV POETRY_VERSION="1.6.1"
+ENV POETRY_VIRTUALENVS_IN_PROJECT=1
 
-# Set the working directory
-WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the requirements file
-COPY requirements.txt .
+# Install Poetry
+RUN set -x \
+    && curl -sSL https://install.python-poetry.org | python3 -
 
-# Install Python requirements
-RUN pip install --no-cache-dir -r requirements.txt
+# This will enable us to invoke Poetry as `poetry` command
+ENV PATH="$POETRY_HOME/bin:$PATH"
 
-# Copy the rest of the app code
-COPY . .
+WORKDIR /code
 
-# Expose the port for Streamlit app
-EXPOSE 8501
+COPY pyproject.toml poetry.lock* README.md ./
+COPY ./ /code/
 
-# Run the Streamlit app
-CMD ["streamlit", "run", "--server.enableCORS", "false", "--server.enableXsrfProtection", "false", "Home.py"]
+RUN poetry install --no-ansi --no-interaction --without dev
+
+FROM python:3.11.3-slim
+
+WORKDIR /code
+
+# Copy the .venv folder from builder image
+COPY --from=builder /code/.venv ./.venv
+COPY ./src /code/src
+
+ENV PYTHONBUFFERED=1
+ENV PATH="/app/.venv/bin:$PATH"
+
+CMD [".venv/bin/python", "-m", "burningbackend"]
