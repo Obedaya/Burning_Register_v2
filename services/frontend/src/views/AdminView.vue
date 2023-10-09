@@ -1,5 +1,24 @@
 <template>
   <v-container fluid>
+    <v-dialog v-model="formvisible" max-width="500px">
+    <v-card>
+      <v-card-title>
+        Movie Reservation Form
+      </v-card-title>
+      <v-card-text>
+        <v-form>
+          <v-text-field label="Movie Name" v-model="addMovieName"></v-text-field>
+          <v-text-field label="Room" v-model="addMovieRoom"></v-text-field>
+          <v-date-picker label="Date" v-model="addMovieDate"></v-date-picker>
+          <v-time-picker label="Time" v-model="addMovieTime"></v-time-picker>
+        </v-form>
+      </v-card-text>
+      <v-card-actions>
+        <v-btn color="primary" @click="saveReservation">Save</v-btn>
+        <v-btn color="error" @click="closeDialog">Cancel</v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
     <!-- Movie Selection Dropdown -->
     <v-row>
       <v-col>
@@ -30,6 +49,7 @@
             </div>
           </v-card-text>
         </v-card>
+        <v-btn @click="formvisible = true">Add Movie</v-btn>
       </v-col>
 
       <v-col cols="8">
@@ -89,6 +109,11 @@ export default {
         { customerName: "Customer 2", orderDate: "2020-01-02" },
       ],
       selectedOrder: null,
+      formvisible: false,
+      addMovieName: "",
+      addMovieRoom: "",
+      addMovieDate: "",
+      addMovieTime: "",
     };
   },
   methods: {
@@ -121,6 +146,13 @@ export default {
       if (this.selectedOrder) {
         // Implement logic to cancel the selected order
       }
+    },
+    closeDialog() {
+      this.formvisible = false;
+    },
+    saveReservation() {
+      // Implement logic to save the reservation
+      this.formvisible = false;
     },
   },
   created() {
