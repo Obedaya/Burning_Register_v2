@@ -49,7 +49,7 @@
             </div>
           </v-card-text>
         </v-card>
-        <v-btn @click="formvisible = true">Add Movie</v-btn>
+        <v-btn @click="formvisible = true" color="primary">Add Movie</v-btn>
       </v-col>
 
       <v-col cols="8">
@@ -91,8 +91,13 @@
   
   <script>
 import axios from "axios";
+import { VDatePicker, VTimePicker } from 'vuetify/lib/components';
 
 export default {
+  components: {
+    VDatePicker,
+    VTimePicker
+  },
   data() {
     return {
       selectedMovie: null,
@@ -112,8 +117,8 @@ export default {
       formvisible: false,
       addMovieName: "",
       addMovieRoom: "",
-      addMovieDate: "",
-      addMovieTime: "",
+      addMovieDate: new Date(),
+      addMovieTime: "12:23",
     };
   },
   methods: {

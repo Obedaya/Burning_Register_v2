@@ -10,16 +10,9 @@ The frontend of Burning Register is written with Vue or more precisely with Vuet
 
 ## Installation
 
-At the moment there are several steps to run the register:
-
 Clone the repository:
 ```
 git clone https://github.com/Obedaya/Burning_Register_v2.git
-```
-
-Go into the backend:
-```
-cd Burning_Register/services/backend
 ```
 
 In the folder create a .env file:
@@ -32,33 +25,9 @@ UVICORN_PORT=9090
 CORS_ORIGINS=["http://localhost:8080"]
 ```
 
-Install backend:
-```
-pip install ./
-```
-
-For the frontend you need to install npm!
-
 ## Usage
 
-Go into the backend:
+Run the docker-compose file
 ```
-cd Burning_Register/services/backend
-```
-
-Run the backend:
-```
-python -m burningbackend
-```
-
----
-
-Go into the frontend:
-```
-cd Burning_Register/services/frontend
-```
-
-Run the frontend:
-```
-npm run serve
+docker-compose up -d
 ```
