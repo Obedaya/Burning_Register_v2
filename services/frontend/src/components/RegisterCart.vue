@@ -1,5 +1,5 @@
 <template>
-  <v-card>
+  <v-card class="overflow-y-auto" max-height="300">
     <v-card-title class="d-flex justify-space-between">
       <div>Cart</div>
       <v-chip color="success" v-if="isteam">Team</v-chip>
