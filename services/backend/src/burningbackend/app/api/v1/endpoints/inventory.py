@@ -3,6 +3,8 @@ from burningbackend.app.models.inventory import Inventory, UpdateInventory
 from fastapi import APIRouter
 from fastapi import HTTPException
 
+from typing import Optional
+
 router = APIRouter()
 
 @router.post("/", response_description="Inventory added to the database")
@@ -12,8 +14,11 @@ async def add_inventory(inventory: Inventory) -> dict:
     return {"message": "Inventory added successfully", "data": inventory}
 
 @router.get("/", response_description="Inventory retrieved")
-async def get_inventory() -> list[Inventory]:
-    inventory = await Inventory.all().to_list()
+async def get_inventory(name: Optional[str] = None) -> list[Inventory]:
+    if name:
+        inventory = await Inventory.find({"name": {"$regex": f".*{name}.*", "$options": "i"}}).to_list()
+    else:
+        inventory = await Inventory.all().to_list()
     return inventory
 
 @router.get("/{id}", response_description="Inventory retrieved")

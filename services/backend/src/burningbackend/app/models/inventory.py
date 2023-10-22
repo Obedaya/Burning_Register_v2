@@ -12,6 +12,7 @@ class Category(str, Enum):
     SNACKS = 'Snacks'
     SWEETS = 'Sweets'
     TICKETS = 'Tickets'
+    PFAND = 'Pfand'
 
 
 class Inventory(Document):
@@ -32,4 +33,4 @@ class UpdateInventory(BaseModel):
     price: Optional[float] = None
     price_team: Optional[float] = None
     amount_sold: Optional[int] = None
-    categrory: Optional[Category] = None
+    category: Optional[Category] = None
