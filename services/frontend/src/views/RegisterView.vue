@@ -1,5 +1,5 @@
 <template>
-  <v-container fluid class="fill-height">
+  <v-container fluid>
     <v-row>
       <v-col>
         <v-select
@@ -8,7 +8,6 @@
           item-title="name"
           item-value="_id"
           label="Select a movie"
-          @change="setSelectedMovie"
           return-object
         ></v-select>
         <ButtonPanel
@@ -60,6 +59,8 @@ import RegisterCart from "../components/RegisterCart.vue";
 import RegisterKeypad from "../components/RegisterKeypad.vue";
 import PayPanel from "../components/PayPanel.vue";
 import axios from "axios";
+import { useMovieStore } from "@/stores/movieStore";
+import { ref, watch } from "vue";
 
 export default {
   data() {
@@ -71,10 +72,29 @@ export default {
       buttonPanelvisible: true,
       total: 0,
       movies: [],
-      selectedMovie: null,
       selectedProduct: null,
     };
   },
+  mounted() {
+    this.getproducts();
+    this.getMovies();
+  },
+  setup() {
+    const movieStore = useMovieStore();
+
+    // Initialize selectedMovie with the value from the store
+    const selectedMovie = ref(movieStore.selectedMovie);
+
+    watch(selectedMovie, (newVal) => {
+      movieStore.selectMovie(newVal);
+      console.log(movieStore.selectedMovie);
+    });
+
+    return {
+      selectedMovie,
+    };
+  },
+
   components: {
     ButtonPanel,
     RegisterCart,
@@ -125,16 +145,14 @@ export default {
       }
       if (product) {
         product.amount += parseInt(this.amountKeyboard);
-      }
-      else if (this.isteam) {
+      } else if (this.isteam) {
         this.productsinCart.push({
           name: item.name,
           price: item.price_team,
           amount: parseInt(this.amountKeyboard),
           category: item.category,
         });
-      }
-      else {
+      } else {
         this.productsinCart.push({
           name: item.name,
           price: item.price,
@@ -236,29 +254,37 @@ export default {
     selectProduct(product) {
       this.selectedProduct = product;
     },
-    deleteFromCart(){
+    deleteFromCart() {
       if (this.selectedProduct) {
         this.productsinCart.splice(
-          this.productsinCart.findIndex((p) => p.name === this.selectedProduct.name),
+          this.productsinCart.findIndex(
+            (p) => p.name === this.selectedProduct.name
+          ),
           1
         );
         this.selectedProduct = null;
         this.$refs.registerCart.clearSelection();
       }
     },
-    increaseProductAmount(){
+    increaseProductAmount() {
       if (this.selectedProduct) {
         this.selectedProduct.amount += 1;
       }
     },
-    decreaseProductAmount(){
+    decreaseProductAmount() {
       if (this.selectedProduct) {
-        if (this.selectedProduct.category === "Drinks" && this.selectedProduct.name !== "Pfand" && !this.isteam) {
+        if (
+          this.selectedProduct.category === "Drinks" &&
+          this.selectedProduct.name !== "Pfand" &&
+          !this.isteam
+        ) {
           // Check if Pfand is in cart
           if (this.productsinCart) {
             this.productsinCart.find((p) => p.name === "Pfand").amount -= 1;
           }
-          if (this.productsinCart.find((p) => p.name === "Pfand").amount === 0) {
+          if (
+            this.productsinCart.find((p) => p.name === "Pfand").amount === 0
+          ) {
             this.productsinCart.splice(
               this.productsinCart.findIndex((p) => p.name === "Pfand"),
               1
@@ -271,10 +297,6 @@ export default {
         }
       }
     },
-  },
-  mounted() {
-    this.getproducts();
-    this.getMovies();
   },
 };
 </script>

@@ -34,24 +34,27 @@
         </v-card>
       </v-col>
     </v-row>
-  </v-container>
-  <v-dialog v-model="dialog" max-width="600">
-    <v-card>
-      <v-card-title class="text-h5">Payment Details</v-card-title>
-      <v-card-text>
-        <div v-if="movieselected">
-          <div class="text-h6">Total: {{ formatPrice(total) }}</div>
-          <div class="text-h6">Change: {{ formatPrice(calculateChange(changeamount)) }}</div>
-        </div>
-        <div v-else>
+
+    <v-dialog v-model="dialog" max-width="600">
+      <v-card>
+        <v-card-title class="text-h5">Payment Details</v-card-title>
+        <v-card-text>
+          <div v-if="movieselected">
+            <div class="text-h6">Total: {{ formatPrice(total) }}</div>
+            <div class="text-h6">
+              Change: {{ formatPrice(calculateChange(changeamount)) }}
+            </div>
+          </div>
+          <div v-else>
             <v-alert text="Please select a movie first" type="error"></v-alert>
-        </div>
-      </v-card-text>
-      <v-card-actions v-if="movieselected">
-        <v-btn color="primary" @click="closeDialog">Book</v-btn>
-      </v-card-actions>
-    </v-card>
-  </v-dialog>
+          </div>
+        </v-card-text>
+        <v-card-actions v-if="movieselected">
+          <v-btn color="primary" @click="closeDialog">Book</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+  </v-container>
 </template>
 
 <script>

@@ -29,7 +29,6 @@
           item-title="name"
           item-value="_id"
           label="Select a movie"
-          @change="setSelectedMovie"
           return-object
         ></v-select>
       </v-col>
@@ -45,7 +44,6 @@
               <p><strong>Title:</strong> {{ selectedMovie.name }}</p>
               <p><strong>Room:</strong> {{ selectedMovie.room }}</p>
               <p><strong>Date:</strong> {{ selectedMovie.datetime }}</p>
-              <!-- Add more movie details here -->@Obedaya's untitled project
             </div>
           </v-card-text>
         </v-card>
@@ -92,6 +90,9 @@
   <script>
 import axios from "axios";
 import { VDatePicker, VTimePicker } from 'vuetify/lib/components';
+import { useMovieStore } from "@/stores/movieStore";
+import { ref, watch } from "vue";
+
 
 export default {
   components: {
@@ -100,15 +101,7 @@ export default {
   },
   data() {
     return {
-      selectedMovie: null,
-      movies: [
-        {
-          _id: "1",
-          name: "Chihiros Reise ins Zauberland",
-          datetime: "2023-06-14T19:30:00.000+00:00",
-          room: "J007",
-        },
-      ],
+      movies: [],
       orders: [
         { customerName: "Customer 1", orderDate: "2020-01-01" },
         { customerName: "Customer 2", orderDate: "2020-01-02" },
@@ -119,6 +112,21 @@ export default {
       addMovieRoom: "",
       addMovieDate: new Date(),
       addMovieTime: "12:23",
+    };
+  },
+  setup() {
+    const movieStore = useMovieStore();
+
+    // Initialize selectedMovie with the value from the store
+    const selectedMovie = ref(movieStore.selectedMovie);
+
+    watch(selectedMovie, (newVal) => {
+      movieStore.selectMovie(newVal);
+      console.log(movieStore.selectedMovie);
+    });
+
+    return {
+      selectedMovie,
     };
   },
   methods: {

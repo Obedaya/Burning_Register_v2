@@ -10,7 +10,6 @@
           item-title="name"
           item-value="_id"
           label="Select a movie"
-          @change="this.setSelectedMovie(selectedMovie)"
           return-object
         ></v-select>
       </v-col>
@@ -53,11 +52,12 @@
   
 <script>
 import axios from "axios";
+import { useMovieStore } from "@/stores/movieStore";
+import { ref, watch } from "vue";
 
 export default {
   data() {
     return {
-      selectedMovie: null,
       movies: [
         {
           _id: "1",
@@ -71,6 +71,21 @@ export default {
       total_sold_without_pfand: 0,
       tickets_sold: 0,
       tickets_sold_team: 0,
+    };
+  },
+  setup() {
+    const movieStore = useMovieStore();
+
+    // Initialize selectedMovie with the value from the store
+    const selectedMovie = ref(movieStore.selectedMovie);
+
+    watch(selectedMovie, (newVal) => {
+      movieStore.selectMovie(newVal);
+      console.log(movieStore.selectedMovie);
+    });
+
+    return {
+      selectedMovie,
     };
   },
   methods: {
