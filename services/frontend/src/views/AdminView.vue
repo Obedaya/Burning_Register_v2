@@ -89,7 +89,7 @@
   
   <script>
 import axios from "axios";
-import { VDatePicker, VTimePicker } from 'vuetify/lib/components';
+import { VDatePicker } from 'vuetify/labs/VDatePicker'
 import { useMovieStore } from "@/stores/movieStore";
 import { ref, watch } from "vue";
 
@@ -97,7 +97,6 @@ import { ref, watch } from "vue";
 export default {
   components: {
     VDatePicker,
-    VTimePicker
   },
   data() {
     return {
