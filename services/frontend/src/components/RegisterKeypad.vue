@@ -15,9 +15,9 @@
 
       </v-col>
       <v-col>
-        <v-btn large color="primary" class="w-100">Delete</v-btn>
-        <v-btn large class="w-100">+</v-btn>
-        <v-btn large class="w-100">-</v-btn>
+        <v-btn large color="primary" class="w-100" @click="deleteFromCart()">Delete</v-btn>
+        <v-btn large class="w-100" @click="increaseProductAmount()">+</v-btn>
+        <v-btn large class="w-100" @click="decreaseProductAmount()">-</v-btn>
         <v-spacer></v-spacer>
         <v-btn large color="success" class="w-100" @click="toggleTeam()">Team</v-btn>
       </v-col>
@@ -52,6 +52,15 @@ export default {
     },
     changeView() {
       this.$emit("changeView");
+    },
+    deleteFromCart() {
+      this.$emit("deleteFromCart");
+    },
+    increaseProductAmount() {
+      this.$emit("increaseProductAmount");
+    },
+    decreaseProductAmount() {
+      this.$emit("decreaseProductAmount");
     },
   },
 };

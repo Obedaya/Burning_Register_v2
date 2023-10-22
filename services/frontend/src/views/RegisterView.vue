@@ -33,13 +33,18 @@
           @clearCart="clearCart"
           @toggleTeam="toggleTeam"
           @changeView="changeView"
+          @deleteFromCart="deleteFromCart"
+          @increaseProductAmount="increaseProductAmount"
+          @decreaseProductAmount="decreaseProductAmount"
         />
       </v-col>
       <v-col>
         <RegisterCart
+          ref="registerCart"
           :amountKeyboard="amountKeyboard"
           :productsinCart="productsinCart"
           :isteam="isteam"
+          @selectProduct="selectProduct"
           @total="setTotal"
         />
       </v-col>
@@ -67,6 +72,7 @@ export default {
       total: 0,
       movies: [],
       selectedMovie: null,
+      selectedProduct: null,
     };
   },
   components: {
@@ -137,7 +143,7 @@ export default {
         });
       }
       // Automatically add Pfand if category is DRINK and item added is not Pfand
-      if (item.category === "Drinks" && item.name !== "Pfand") {
+      if (item.category === "Drinks" && item.name !== "Pfand" && !this.isteam) {
         this.addItem(this.products.find((p) => p.name === "Pfand"));
       }
       this.amountKeyboard = "";
@@ -226,6 +232,44 @@ export default {
           // Handle errors
           console.log(error);
         });
+    },
+    selectProduct(product) {
+      this.selectedProduct = product;
+    },
+    deleteFromCart(){
+      if (this.selectedProduct) {
+        this.productsinCart.splice(
+          this.productsinCart.findIndex((p) => p.name === this.selectedProduct.name),
+          1
+        );
+        this.selectedProduct = null;
+        this.$refs.registerCart.clearSelection();
+      }
+    },
+    increaseProductAmount(){
+      if (this.selectedProduct) {
+        this.selectedProduct.amount += 1;
+      }
+    },
+    decreaseProductAmount(){
+      if (this.selectedProduct) {
+        if (this.selectedProduct.category === "Drinks" && this.selectedProduct.name !== "Pfand" && !this.isteam) {
+          // Check if Pfand is in cart
+          if (this.productsinCart) {
+            this.productsinCart.find((p) => p.name === "Pfand").amount -= 1;
+          }
+          if (this.productsinCart.find((p) => p.name === "Pfand").amount === 0) {
+            this.productsinCart.splice(
+              this.productsinCart.findIndex((p) => p.name === "Pfand"),
+              1
+            );
+          }
+        }
+        this.selectedProduct.amount -= 1;
+        if (this.selectedProduct.amount === 0) {
+          this.deleteFromCart();
+        }
+      }
     },
   },
   mounted() {

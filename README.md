@@ -22,7 +22,9 @@ MONGODB_DB_NAME=[Your MongoDB databasename]
 
 UVICORN_PORT=9090
 
-CORS_ORIGINS=["http://localhost:8080"]
+CORS_ORIGINS=["http://localhost:8080","http://[YOUR IP]:8080"]
+
+VUE_APP_DB_ADDRESS='http://[YOUR IP]:9090'
 ```
 
 ## Usage

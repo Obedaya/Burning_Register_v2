@@ -45,7 +45,7 @@
               <p><strong>Title:</strong> {{ selectedMovie.name }}</p>
               <p><strong>Room:</strong> {{ selectedMovie.room }}</p>
               <p><strong>Date:</strong> {{ selectedMovie.datetime }}</p>
-              <!-- Add more movie details here -->
+              <!-- Add more movie details here -->@Obedaya's untitled project
             </div>
           </v-card-text>
         </v-card>

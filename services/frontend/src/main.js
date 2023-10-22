@@ -10,8 +10,10 @@ loadFonts()
 
 const pinia = createPinia()
 
+const apiEndpoint = process.env.VUE_APP_DB_ADDRESS;
+
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://localhost:9090/';  // the FastAPI backend
+axios.defaults.baseURL = apiEndpoint;  // the FastAPI backend
 
 axios.interceptors.response.use(undefined, function (error) {
   if (error) {

@@ -2,20 +2,23 @@
   <v-card>
     <v-card-title class="d-flex justify-space-between">
       <div>Cart</div>
-      <v-chip color="success" v-if="isTeam">Team</v-chip>
+      <v-chip color="success" v-if="isteam">Team</v-chip>
     </v-card-title>
     <v-divider></v-divider>
     <v-card-text>
       <v-list>
-        <v-list-item-group v-model="model" selected-class="primary">
+        <v-list-item-group
+          v-model="selectedProductIndex"
+          active-class="primary"
+        >
           <v-list-item
             v-for="(product, index) in productsinCart"
             :key="index"
-            @click="selectProduct()"
-            #default="{ active, toggle }"
+            :value="index"
             class="w-100"
+            @click="selectProduct(index)"
           >
-            <v-list-item-content class="d-flex justify-space-between" @change="toggle(!active)">
+            <v-list-item-content class="d-flex justify-space-between">
               <div>{{ product.amount }}x {{ product.name }}</div>
               <div>
                 Price: {{ formatPrice(product.price) }} Total:
@@ -26,6 +29,7 @@
         </v-list-item-group>
       </v-list>
     </v-card-text>
+
     <v-divider></v-divider>
     <v-card-actions>
       <v-row>
@@ -49,6 +53,8 @@ export default {
     return {
       total: 0,
       model: 1,
+      selectedProductIndex: null,
+      selectedProduct: null,
     };
   },
   methods: {
@@ -73,8 +79,20 @@ export default {
         return `${price.toFixed(2).replace(/\.0{2}$/, "")}€`;
       }
     },
-    selectProduct() {
-      console.log("selectProduct");
+    // Select product in cart
+    selectProduct(index) {
+      if (this.selectedProductIndex !== index) {
+        this.selectedProductIndex = index;
+        this.selectedProduct = this.productsinCart[this.selectedProductIndex];
+        this.$emit("selectProduct", this.selectedProduct);
+      } else {
+        this.selectedProductIndex = null;
+        this.selectedProduct = null;
+      }
+    },
+    clearSelection() {
+      this.selectedProductIndex = null;
+      this.selectedProduct = null;
     },
   },
   props: {
@@ -85,7 +103,7 @@ export default {
     productsinCart: {
       type: Array,
     },
-    isTeam: {
+    isteam: {
       type: Boolean,
       default: false,
     },
