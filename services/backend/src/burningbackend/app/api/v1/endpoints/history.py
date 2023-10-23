@@ -1,5 +1,7 @@
 from burningbackend.app.models.history import History
 
+from bson.objectid import ObjectId
+
 from fastapi import APIRouter
 from fastapi import HTTPException
 
@@ -21,14 +23,15 @@ async def add_history(history: History) -> dict:
     return {"message": "History added successfully", "data": history}
 
 @router.post("/cancel/", response_description="Canceled booked order")
-async def add_history(_id: str, iscancled: bool = True) -> dict:
-    history = await History.get(_id)
+async def add_history(_id: str, cancellation: bool = True) -> dict:
+    id = ObjectId(_id)
+    history = await History.get(id)
     if not history:
         raise HTTPException(
             status_code=404,
             detail="History record not found"
         )
-    history.iscancled = iscancled
+    history.cancellation = cancellation
     await history.save()
     return {"message": "History updated successfully", "data": history}
 

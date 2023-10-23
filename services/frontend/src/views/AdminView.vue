@@ -63,11 +63,14 @@
               >
                 <v-list-item-content>
                   <v-list-item-title>{{
-                    order.customerName
+                    order.timestamp
                   }}</v-list-item-title>
-                  <v-list-item-subtitle>{{
-                    order.orderDate
-                  }}</v-list-item-subtitle>
+                  <v-list-item-subtitle>
+                    Total: {{ order.total }}
+                    IsTeam: {{ order.isteam }}
+                    Products: {{ printProducts(order) }}
+                    Canceled: {{ order.cancellation }}
+                  </v-list-item-subtitle>
                 </v-list-item-content>
               </v-list-item>
             </v-list>
@@ -90,6 +93,7 @@
   <script>
 import axios from "axios";
 import { VDatePicker } from 'vuetify/labs/VDatePicker'
+import { VTimePicker } from 'vuetify'
 import { useMovieStore } from "@/stores/movieStore";
 import { ref, watch } from "vue";
 
@@ -97,20 +101,18 @@ import { ref, watch } from "vue";
 export default {
   components: {
     VDatePicker,
+    VTimePicker,
   },
   data() {
     return {
       movies: [],
-      orders: [
-        { customerName: "Customer 1", orderDate: "2020-01-01" },
-        { customerName: "Customer 2", orderDate: "2020-01-02" },
-      ],
+      orders: [],
       selectedOrder: null,
       formvisible: false,
       addMovieName: "",
       addMovieRoom: "",
       addMovieDate: new Date(),
-      addMovieTime: "12:23",
+      addMovieTime: new Date(),
     };
   },
   setup() {
@@ -137,7 +139,23 @@ export default {
         })
         .then((response) => {
           // Handle success
+          console.log(response.data);
           this.movies = response.data;
+        })
+        .catch((error) => {
+          // Handle errors
+          console.log(error);
+        });
+    },
+    getHistory() {
+      // Implement logic to fetch order history from the backend
+      axios
+        .get("/api/v1/history/?movie=" + this.selectedMovie.name, {
+          withCredentials: false, // Ensure credentials are not sent
+        })
+        .then((response) => {
+          // Handle success
+          this.orders = response.data;
         })
         .catch((error) => {
           // Handle errors
@@ -151,13 +169,18 @@ export default {
         this.selectedOrder = order;
       }
     },
-    cancelOrder(order) {
-      console.log(order);
-    },
     cancelSelectedOrder() {
-      if (this.selectedOrder) {
-        // Implement logic to cancel the selected order
-      }
+      axios
+      .post("/api/v1/history/cancel/?_id=" + this.selectedOrder._id.toString(), {
+        withCredentials: false,
+      })
+      .then(() => {
+        this.getHistory();
+      })
+      .catch((error) => {
+        // Handle errors
+        console.log(error);
+      })
     },
     closeDialog() {
       this.formvisible = false;
@@ -166,9 +189,25 @@ export default {
       // Implement logic to save the reservation
       this.formvisible = false;
     },
+    printProducts(order) {
+      let products = "";
+      for (let i = 0; i < order.products.length; i++) {
+        products += order.products[i].name + " x" + order.products[i].amount;
+        if (i < order.products.length - 1) {
+          products += ", ";
+        }
+      }
+      return products;
+    },
   },
   created() {
     this.getMovies();
+    this.getHistory();
+  },
+  watch: {
+    selectedMovie() {
+      this.getHistory();
+    },
   },
 };
 </script>
