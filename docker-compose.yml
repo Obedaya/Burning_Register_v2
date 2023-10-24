@@ -1,14 +1,11 @@
 version: '3.9'
 
 services:
-
   frontend:
     build: ./services/frontend
     volumes:
       - './services/frontend:/app'
       - '/app/node_modules'
-    ports:
-      - 8080:8080
     env_file:
       - .env
 
@@ -17,21 +14,24 @@ services:
       context: ./services/backend
     depends_on:
       - db
-    env_file:
-      - .env
-    ports:
-      - ${UVICORN_PORT}:${UVICORN_PORT}
     restart: always
 
-  db:  # This service name will be also used as hostname for MONGODB_URI
-    image: mongo:7.0.2
+## Only enable this if you want to use a local mongodb instance
+#  db:  # This service name will be also used as hostname for MONGODB_URI
+#    image: mongo:7.0.2
+#    env_file:
+#      - .env
+#    volumes:
+#      - mongodb-data:/data/db
+#    restart: always
+
+  tunnel:
+    container_name: cloudflared-tunnel
+    image: cloudflare/cloudflared
+    restart: unless-stopped
+    command: tunnel run
     env_file:
       - .env
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongodb-data:/data/db
-    restart: always
 
 volumes:
   mongodb-data:
