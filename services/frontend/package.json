@@ -9,27 +9,27 @@
   },
   "dependencies": {
     "@mdi/font": "5.9.55",
-    "axios": "^1.5.0",
-    "core-js": "^3.8.3",
-    "pinia": "^2.1.6",
-    "roboto-fontface": "*",
+    "axios": "^1.5.1",
+    "core-js": "^3.33.1",
+    "pinia": "^2.1.7",
+    "roboto-fontface": "^0.10.0",
     "store": "^2.0.12",
     "vue": "^3.2.13",
-    "vue-router": "^4.0.3",
+    "vue-router": "^4.2.5",
     "vuetify": "^3.3.22",
     "vuetify-datetime-picker": "^2.1.1",
-    "webfontloader": "^1.0.0"
+    "webfontloader": "^1.6.28"
   },
   "devDependencies": {
-    "@babel/core": "^7.12.16",
-    "@babel/eslint-parser": "^7.12.16",
+    "@babel/core": "^7.23.2",
+    "@babel/eslint-parser": "^7.22.15",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-router": "~5.0.0",
     "@vue/cli-service": "^5.0.8",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^8.0.3",
+    "eslint-plugin-vue": "^8.7.1",
     "vue-cli-plugin-vuetify": "~2.5.8",
-    "webpack-plugin-vuetify": "^2.0.0-alpha.0"
+    "webpack-plugin-vuetify": "^2.0.1"
   }
 }
