@@ -12,9 +12,9 @@ services:
   backend:
     build:
       context: ./services/backend
-    depends_on:
-      - db
     restart: always
+    env_file:
+      - .env
 
 ## Only enable this if you want to use a local mongodb instance
 #  db:  # This service name will be also used as hostname for MONGODB_URI
@@ -33,5 +33,6 @@ services:
     env_file:
       - .env
 
-volumes:
-  mongodb-data:
+## Only enable this if you want to use a local mongodb instance
+# volumes:
+#   mongodb-data:
