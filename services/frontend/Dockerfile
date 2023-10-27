@@ -1,10 +1,12 @@
 # build stage
-FROM node:lts-alpine as build-stage
+FROM oven/bun:latest as build-stage
 WORKDIR /app
-COPY package*.json ./
-RUN npm install
+COPY package.json ./
+COPY bun.lockb ./
+
+RUN bun install
 COPY . .
-RUN npm run build
+RUN bun run build
 
 # production stage
 FROM nginx:stable-alpine as production-stage
