@@ -1,5 +1,6 @@
 # build stage
-FROM oven/bun:latest
+FROM alpine
+RUN curl -fsSL https://bun.sh/install | bash
 WORKDIR /app
 COPY package.json ./
 COPY bun.lockb ./
