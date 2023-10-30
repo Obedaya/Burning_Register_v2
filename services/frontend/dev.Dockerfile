@@ -11,6 +11,6 @@ COPY vue.config.js ./
 COPY .eslintrc.js ./
 
 
-RUN bun install
+RUN bash bun install
 COPY src ./src
-CMD ["bun", "serve"]
+CMD ["bash", "bun", "serve"]
