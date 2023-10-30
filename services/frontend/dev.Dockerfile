@@ -1,5 +1,6 @@
 # build stage
 FROM alpine
+RUN apk add curl bash
 RUN curl -fsSL https://bun.sh/install | bash
 WORKDIR /app
 COPY package.json ./
