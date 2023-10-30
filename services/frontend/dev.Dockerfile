@@ -10,7 +10,7 @@ COPY .eslintrc.js ./
 
 RUN npm install
 COPY src ./src
-CMD npm run build
+RUN npm run build
 
 # production stage
 
