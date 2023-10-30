@@ -6,4 +6,4 @@ COPY bun.lockb ./
 
 RUN bun install
 COPY . .
-CMD ["bun", "run", "serve"]
+CMD ["bun", "serve"]
