@@ -181,6 +181,8 @@ export default {
           product.price = this.products.find(
             (p) => p.name === product.name
           ).price_team;
+        });
+        this.productsinCart.forEach((product) => {
           // Remove Pfand from cart if Team is toggled on
           if (product.name === "Pfand") {
             this.productsinCart.splice(
