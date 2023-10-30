@@ -1,5 +1,5 @@
 # build stage
-FROM dvlprtech/bun:latest
+FROM node
 WORKDIR /app
 COPY package.json ./
 COPY bun.lockb ./
@@ -8,6 +8,6 @@ COPY jsconfig.json ./
 COPY vue.config.js ./
 COPY .eslintrc.js ./
 
-RUN bun install
+RUN npm install
 COPY src ./src
-CMD ["bun", "serve"]
+CMD ["npm", "run", "serve"]
