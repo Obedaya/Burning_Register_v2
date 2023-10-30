@@ -40,7 +40,7 @@
           <div class="text-h6">Total:</div>
         </v-col>
         <v-col justify="end" class="text-right">
-          <div class="text-h6">{{ formatPrice(calculateTotal()) }}</div>
+          <div class="text-h6">{{ formatPrice(total) }}</div>
         </v-col>
       </v-row>
     </v-card-actions>
@@ -57,15 +57,19 @@ export default {
       selectedProduct: null,
     };
   },
-  methods: {
-    // Calculate total price of all products in cart
-    calculateTotal() {
+  computed: {
+    total() {
       return this.productsinCart.reduce((total, product) => {
-        this.total = total + product.price * product.amount;
-        this.$emit("total", this.total);
-        return this.total;
+        return total + product.price * product.amount;
       }, 0);
     },
+  },
+  watch: {
+    total(newTotal) {
+      this.$emit("total", newTotal);
+    },
+  },
+  methods: {
     // Format price to 2 decimal places
     formatPrice(price) {
       price = parseFloat(price);
