@@ -3,9 +3,13 @@ FROM oven/bun:latest as build-stage
 WORKDIR /app
 COPY package.json ./
 COPY bun.lockb ./
+COPY babel.config.js ./
+COPY jsconfig.json ./
+COPY vue.config.js ./
+COPY .eslintrc.js ./
 
 RUN bun install
-COPY . .
+COPY src ./src
 RUN bun run build
 
 # production stage

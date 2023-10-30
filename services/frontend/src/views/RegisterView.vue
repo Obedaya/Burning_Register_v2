@@ -144,19 +144,12 @@ export default {
         return;
       }
       if (product) {
-        product.amount += parseInt(this.amountKeyboard);
-      } else if (this.isteam) {
-        this.productsinCart.push({
-          name: item.name,
-          price: item.price_team,
-          amount: parseInt(this.amountKeyboard),
-          category: item.category,
-        });
+        product.amount += +this.amountKeyboard;
       } else {
         this.productsinCart.push({
           name: item.name,
-          price: item.price,
-          amount: parseInt(this.amountKeyboard),
+          price: this.isteam ? item.price_team : item.price,
+          amount: +this.amountKeyboard,
           category: item.category,
         });
       }
