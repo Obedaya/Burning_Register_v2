@@ -40,7 +40,7 @@
           <div class="text-h6">Total:</div>
         </v-col>
         <v-col justify="end" class="text-right">
-          <div class="text-h6">{{ formatPrice(total) }}</div>
+          <div class="text-h6">{{ formatPrice(calculatedtotal) }}</div>
         </v-col>
       </v-row>
     </v-card-actions>
@@ -58,14 +58,14 @@ export default {
     };
   },
   computed: {
-    total() {
+    calculatedtotal() {
       return this.productsinCart.reduce((total, product) => {
         return total + product.price * product.amount;
       }, 0);
     },
   },
   watch: {
-    total(newTotal) {
+    calculatedtotal(newTotal) {
       this.$emit("total", newTotal);
     },
   },
