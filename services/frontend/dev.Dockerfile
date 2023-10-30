@@ -1,7 +1,10 @@
 # build stage
 FROM alpine
-RUN apk add curl bash
-RUN curl -fsSL https://bun.sh/install | bash
+WORKDIR /app
+ADD https://github.com/oven-sh/bun/releases/latest/download/bun-linux-x64.zip bun-linux-x64.zip
+RUN unzip bun-linux-x64.zip
+RUN mv bun-linux-x64/bun /usr/local/bin/bun 
+RUN chmod +x /usr/local/bin/bun
 WORKDIR /app
 COPY package.json ./
 COPY bun.lockb ./
@@ -11,6 +14,6 @@ COPY vue.config.js ./
 COPY .eslintrc.js ./
 
 
-RUN bash bun install
+RUN bun install
 COPY src ./src
-CMD ["bash", "bun", "serve"]
+CMD ["bun", "serve"]
