@@ -69,6 +69,8 @@ async def get_tickets(movie: str, isteam: bool = False, freeticket: bool = False
                 if j.name == "Ticket":
                     total += j.amount
             else:
+                if j.name == "Ticket":
+                    total += j.amount
                 if j.name == "Freiticket":
                     total += j.amount
     return total

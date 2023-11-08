@@ -87,7 +87,6 @@ export default {
 
     watch(selectedMovie, (newVal) => {
       movieStore.selectMovie(newVal);
-      console.log(movieStore.selectedMovie);
     });
 
     return {
@@ -109,7 +108,6 @@ export default {
         })
         .then((response) => {
           // Handle success
-          console.log(response.data);
           this.products = response.data;
         })
         .catch((error) => {
@@ -201,7 +199,6 @@ export default {
     },
     // Checkout, clear cart and reset amountKeyboard
     checkout() {
-      console.log(this.productsinCart);
       // Create new dictionary with selected movie, timestamp, list of products and total price
       const order = {
         timestamp: new Date().toISOString(),
@@ -211,8 +208,6 @@ export default {
         cancellation: false,
         products: this.productsinCart,
       };
-      console.log(order);
-      // Send order to backend
       axios
         .post("/api/v1/history/", order, {
           withCredentials: false, // Ensure credentials are not sent

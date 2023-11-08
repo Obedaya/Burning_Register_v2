@@ -4,14 +4,8 @@
     <v-row>
       <v-col>
         <!-- Movie Selection Dropdown -->
-        <v-select
-          v-model="selectedMovie"
-          :items="movies"
-          item-title="name"
-          item-value="_id"
-          label="Select a movie"
-          return-object
-        ></v-select>
+        <v-select v-model="selectedMovie" :items="movies" item-title="name" item-value="_id" label="Select a movie"
+          return-object></v-select>
       </v-col>
     </v-row>
     <!-- Display Information about the selected movie here -->
@@ -30,7 +24,7 @@
         </v-card>
       </v-col>
       <v-col cols="8">
-        <v-card class="overflow-y-auto" max-height="400">
+        <v-card class="overflow-y-auto">
           <v-card-title>Statistics</v-card-title>
           <v-card-text>
             <h4>Total Sold:</h4>
@@ -41,8 +35,31 @@
             {{ total_sold_without_pfand }}€
             <h4>Tickets Sold:</h4>
             {{ tickets_sold }}x
-            <h4>Tickets Sold to the Team:</h4>
-            {{ tickets_sold_team }}x
+            <h4>Total Tickets with Freitickets:</h4>
+            {{ tickets_total }}x
+          </v-card-text>
+        </v-card>
+        <v-card class="overflow-y-auto">
+          <v-card-title>Products</v-card-title>
+          <v-card-text>
+            <v-table>
+              <thead>
+                <tr>
+                  <th class="text-left">Name</th>
+                  <th class="text-left">Amount</th>
+                  <th class="text-left">Price</th>
+                  <th class="text-left">Total</th>
+                </tr>
+              </thead>
+              <t-body>
+                <tr v-for="product in history_products" :key="product._id">
+                  <td>{{ product.name }}</td>
+                  <td>{{ product.amount }}</td>
+                  <td>{{ product.price }}€</td>
+                  <td>{{ product.price * product.amount }}€</td>
+                </tr>
+              </t-body>
+            </v-table>
           </v-card-text>
         </v-card>
       </v-col>
@@ -66,11 +83,29 @@ export default {
           room: "J007",
         },
       ],
+      orders: [
+        {
+          _id: "2",
+          movie: "Chiros Reise ins Zauberland",
+          total: "20",
+          isTeam: "false",
+          products: [
+            {
+              name: "Cola",
+              price: "2",
+              amount: "10",
+              category: "drinks",
+            },
+          ],
+        }
+      ],
+      cancelled_orders: [],
+      history_products: [],
       total_sold: 0,
       total_sold_team: 0,
       total_sold_without_pfand: 0,
       tickets_sold: 0,
-      tickets_sold_team: 0,
+      tickets_total: 0,
     };
   },
   setup() {
@@ -81,7 +116,6 @@ export default {
 
     watch(selectedMovie, (newVal) => {
       movieStore.selectMovie(newVal);
-      console.log(movieStore.selectedMovie);
     });
 
     return {
@@ -99,13 +133,52 @@ export default {
         console.error(error);
       }
     },
+    async getHistory() {
+      try {
+        const response = await axios.get(
+          "/api/v1/history/?movie=" + this.selectedMovie.name,
+          {
+            withCredentials: false,
+          }
+        );
+        // Handle success
+        const cancelled_orders = [];
+        const orders = [];
+
+        response.data.forEach((order) => {
+          if (order.cancellation === "true") {
+            cancelled_orders.push(order);
+          } else {
+            orders.push(order);
+            this.getHistoryProducts();
+          }
+        });
+
+        this.cancelled_orders = cancelled_orders;
+        this.orders = orders;
+      } catch (error) {
+        // Handle errors
+        console.log(error);
+      }
+    },
+
+    getHistoryProducts(){
+      const history_products = [];
+      this.orders.forEach((order) => {
+        order.products.forEach((product) => {
+          history_products.push(product);
+        });
+      });
+      this.history_products = history_products;
+    },
+    
     async getTotal() {
       try {
         const response = await this.getTotalInfo(
           this.selectedMovie.name,
           false,
           false,
-          false
+          true
         );
         this.total_sold = response;
       } catch (error) {
@@ -131,7 +204,7 @@ export default {
           this.selectedMovie.name,
           false,
           false,
-          true
+          false
         );
         this.total_sold_without_pfand = response;
       } catch (error) {
@@ -143,7 +216,6 @@ export default {
         const response = await this.getTicketInfo(
           this.selectedMovie.name,
           false,
-          false,
           true
         );
         this.tickets_sold = response;
@@ -151,15 +223,14 @@ export default {
         console.error(error);
       }
     },
-    async getTicketsTeam() {
+    async getTicketsTotal() {
       try {
         const response = await this.getTicketInfo(
           this.selectedMovie.name,
-          true,
           false,
-          true
+          false
         );
-        this.tickets_sold_team = response;
+        this.tickets_total = response;
       } catch (error) {
         console.error(error);
       }
@@ -191,11 +262,12 @@ export default {
       }
     },
     async setSelectedMovie() {
+      await this.getHistory();
       await this.getTotal();
       await this.getTotalTeam();
       await this.getTotalWithoutPfand();
       await this.getTickets();
-      await this.getTicketsTeam();
+      await this.getTicketsTotal();
     },
   },
   created() {
@@ -212,6 +284,5 @@ export default {
 </script>
 
   
-  <style scoped>
-</style>
+<style scoped></style>
   

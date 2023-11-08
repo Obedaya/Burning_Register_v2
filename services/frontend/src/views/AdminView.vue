@@ -123,7 +123,6 @@ export default {
 
     watch(selectedMovie, (newVal) => {
       movieStore.selectMovie(newVal);
-      console.log(movieStore.selectedMovie);
     });
 
     return {
@@ -139,7 +138,6 @@ export default {
         })
         .then((response) => {
           // Handle success
-          console.log(response.data);
           this.movies = response.data;
         })
         .catch((error) => {
