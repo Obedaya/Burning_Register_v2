@@ -9,6 +9,7 @@ from .user import User
 from .movie import Movie
 from .inventory import Inventory
 from .history import History
+from .reservation import Reservation
 
 DocType = TypeVar("DocType", bound=Document)
 
