@@ -8,7 +8,9 @@ router = APIRouter()
 
 @router.get("/reservations", response_description="Reservations retrieved")
 async def get_all_reservations() -> Reservation:
-    reservations = await Reservation.objects.all()
+    reservations = await Reservation.all().to_list()
+    if not reservations:
+        raise HTTPException(status_code=404, detail="No reservations found")
     return reservations
 
 
