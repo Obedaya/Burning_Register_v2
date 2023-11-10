@@ -9,8 +9,6 @@
         <v-form>
           <v-text-field label="Movie Name" v-model="addMovieName"></v-text-field>
           <v-text-field label="Room" v-model="addMovieRoom"></v-text-field>
-          <v-date-picker label="Date" v-model="addMovieDate"></v-date-picker>
-          <v-time-picker label="Time" v-model="addMovieTime"></v-time-picker>
         </v-form>
       </v-card-text>
       <v-card-actions>
@@ -92,16 +90,13 @@
   
   <script>
 import axios from "axios";
-import { VDatePicker } from 'vuetify/labs/VDatePicker'
-import { VTimePicker } from 'vuetify'
 import { useMovieStore } from "@/stores/movieStore";
 import { ref, watch } from "vue";
 
 
 export default {
   components: {
-    VDatePicker,
-    VTimePicker,
+
   },
   data() {
     return {
