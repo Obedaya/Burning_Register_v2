@@ -1,21 +1,21 @@
 <template>
   <v-container fluid>
-    <v-dialog v-model="formvisible" max-width="500px">
-    <v-card>
-      <v-card-title>
-        Movie Reservation Form
-      </v-card-title>
-      <v-card-text>
-        <v-form>
-          <v-text-field label="Movie Name" v-model="addMovieName"></v-text-field>
-          <v-text-field label="Room" v-model="addMovieRoom"></v-text-field>
+    <v-dialog v-model="formvisible">
+      <v-sheet class="mx-auto w-50">
+        <v-form fast-fail @submit.prevent>
+          <v-text-field label="Movie Name" v-model="tempMovieName"></v-text-field>
+          <v-text-field label="Room" v-model="tempMovieRoom"></v-text-field>
+          <v-text-field label="Date and Time" v-model="tempMovieDatetime" :rules="movieDatetimeRule" :disabled="datetimeDisabled"></v-text-field>
+          <v-text-field label="Trailer" v-model="tempMovieTrailer"></v-text-field>
+          <v-text-field label="Description" v-model="tempMovieDescription"></v-text-field>
+          <v-text-field label="Language" v-model="tempMovieLanguage"></v-text-field>
+          <v-text-field label="Poster" v-model="tempMoviePoster"></v-text-field>
+          <v-text-field label="Stripe Payment" v-model="tempMovieStripePayment"></v-text-field>
+          
+          <v-btn type="submit" color="primary" @click="submitMovie">Submit</v-btn>
+          <v-btn color="error" @click="clearForm">Cancel</v-btn>
         </v-form>
-      </v-card-text>
-      <v-card-actions>
-        <v-btn color="primary" @click="saveReservation">Save</v-btn>
-        <v-btn color="error" @click="closeDialog">Cancel</v-btn>
-      </v-card-actions>
-    </v-card>
+      </v-sheet>
   </v-dialog>
     <!-- Movie Selection Dropdown -->
     <v-row>
@@ -46,6 +46,7 @@
           </v-card-text>
         </v-card>
         <v-btn @click="formvisible = true" color="primary">Add Movie</v-btn>
+        <v-btn @click="editMovie" color="secondary" v-if="selectedMovie">Edit Movie</v-btn>
       </v-col>
 
       <v-col cols="8">
@@ -104,10 +105,23 @@ export default {
       orders: [],
       selectedOrder: null,
       formvisible: false,
-      addMovieName: "",
-      addMovieRoom: "",
-      addMovieDate: new Date(),
-      addMovieTime: new Date(),
+      tempMovieName: "",
+      tempMovieRoom: "",
+      tempMovieDatetime: new Date().toISOString().slice(0, 19).replace('T', ' '),
+      movieDatetimeRule: [
+        value => {
+          if (/^(19|20)\d\d-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01]) ([01][0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])$/.test(value)) return true
+
+          return 'Invalid date-time format. Please use the following format: YYYY-MM-DD HH:MM:SS'
+        },
+      ],
+      tempMovieTrailer: "",
+      tempMovieDescription: "",
+      tempMovieLanguage: "",
+      tempMoviePoster: "",
+      tempMovieStripePayment: "",
+      movieEditing: false,
+      datetimeDisabled: false,
     };
   },
   setup() {
@@ -175,12 +189,91 @@ export default {
         console.log(error);
       })
     },
-    closeDialog() {
+    submitMovie() {
+      if (this.movieEditing) {
+        this.editMovieToDB();
+      } else {
+        this.addMovieToDB();
+      }
+      this.clearForm();
+    },
+    clearForm(){
+      this.tempMovieName = "";
+      this.tempMovieRoom = "";
+      this.tempMovieDatetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      this.tempMovieTrailer = "";
+      this.tempMovieDescription = "";
+      this.tempMovieLanguage = "";
+      this.tempMoviePoster = "";
+      this.tempMovieStripePayment = "";
+
+      this.movieEditing = false;
+      this.datetimeDisabled = false;
       this.formvisible = false;
     },
-    saveReservation() {
-      // Implement logic to save the reservation
-      this.formvisible = false;
+    addMovieToDB() {
+      const movie = {
+        name: this.tempMovieName,
+        datetime: new Date(this.tempMovieDatetime.replace(/-/g, '/')),
+        room: this.tempMovieRoom,
+        trailer: this.tempMovieTrailer,
+        description: this.tempMovieDescription,
+        language: this.tempMovieLanguage,
+        poster: this.tempMoviePoster,
+        stripe_payment: this.tempMovieStripePayment,
+      };
+      axios
+        .post("/api/v1/movies/", movie, {
+          withCredentials: false,
+        })
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    editMovie(){
+      this.movieEditing = true;
+      this.datetimeDisabled = true;
+      let datetime = new Date(this.selectedMovie.datetime);
+      let formattedDatetime = datetime.toISOString().slice(0, 19).replace('T', ' ');
+
+      // Set default value of input fields to current movie
+      this.tempMovieName = this.selectedMovie.name;
+      this.tempMovieRoom = this.selectedMovie.room;
+      this.tempMovieDatetime = formattedDatetime;
+      this.tempMovieTrailer = this.selectedMovie.trailer;
+      this.tempMovieDescription = this.selectedMovie.description;
+      this.tempMovieLanguage = this.selectedMovie.language;
+      this.tempMoviePoster = this.selectedMovie.poster;
+      this.tempMovieStripePayment = this.selectedMovie.stripe_payment;
+
+      this.formvisible = true;
+    },
+    editMovieToDB() {
+      const movie = {
+        name: this.tempMovieName,
+        room: this.tempMovieRoom,
+        trailer: this.tempMovieTrailer,
+        description: this.tempMovieDescription,
+        language: this.tempMovieLanguage,
+        poster: this.tempMoviePoster,
+        stripe_payment: this.tempMovieStripePayment,
+      };
+      axios
+        .put("/api/v1/movies/" + this.selectedMovie._id.toString(), movie, {
+          withCredentials: false,
+        })
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+      this.movieEditing = false;
+      this.datetimeDisabled = false;
     },
     printProducts(order) {
       let products = "";
