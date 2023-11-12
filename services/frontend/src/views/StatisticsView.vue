@@ -51,14 +51,14 @@
                   <th class="text-left">Total</th>
                 </tr>
               </thead>
-              <t-body>
-                <tr v-for="product in history_products" :key="product._id">
+              <tbody>
+                <tr v-for="product in history_products" :key="product.name">
                   <td>{{ product.name }}</td>
                   <td>{{ product.amount }}</td>
                   <td>{{ product.price }}€</td>
                   <td>{{ product.price * product.amount }}€</td>
                 </tr>
-              </t-body>
+              </tbody>
             </v-table>
           </v-card-text>
         </v-card>
@@ -150,7 +150,6 @@ export default {
             cancelled_orders.push(order);
           } else {
             orders.push(order);
-            this.getHistoryProducts();
           }
         });
 
@@ -162,16 +161,23 @@ export default {
       }
     },
 
-    getHistoryProducts(){
+    getHistoryProducts() {
       const history_products = [];
       this.orders.forEach((order) => {
         order.products.forEach((product) => {
-          history_products.push(product);
+          if (history_products.find((p) => p.name === product.name)) {
+            const index = history_products.findIndex(
+              (p) => p.name === product.name
+            );
+            history_products[index].amount += product.amount;
+          } else {
+            history_products.push(product);
+          } 
         });
       });
       this.history_products = history_products;
     },
-    
+
     async getTotal() {
       try {
         const response = await this.getTotalInfo(
@@ -263,6 +269,7 @@ export default {
     },
     async setSelectedMovie() {
       await this.getHistory();
+      this.getHistoryProducts();
       await this.getTotal();
       await this.getTotalTeam();
       await this.getTotalWithoutPfand();
