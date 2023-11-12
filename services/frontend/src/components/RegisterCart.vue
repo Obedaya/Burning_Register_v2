@@ -1,11 +1,11 @@
 <template>
-  <v-card class="overflow-y-auto" max-height="300">
+  <v-card>
     <v-card-title class="d-flex justify-space-between">
       <div>Cart</div>
       <v-chip color="success" v-if="isteam">Team</v-chip>
     </v-card-title>
     <v-divider></v-divider>
-    <v-card-text>
+    <v-card-text class="overflow-y-auto" style="max-height: 250px;">
       <v-list>
         <v-list-item-group
           v-model="selectedProductIndex"
