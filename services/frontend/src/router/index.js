@@ -7,23 +7,36 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: RegisterView
+    component: RegisterView,
+    meta: {
+      title: 'Burning Register'
+    }
   },
   {
     path: '/statistics',
     name: 'statistics',
-    component: StatisticsView
+    component: StatisticsView,
+    meta: {
+      title: 'Burning Register - Statistics'
+    }
   },
   {
     path: '/admin',
     name: 'admin',
-    component: AdminView
+    component: AdminView,
+    meta: {
+      title: 'Burning Register - Admin'
+    }
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes
+})
+
+router.beforeEach((to) => {
+  document.title = to.meta?.title ?? 'Burning Register'
 })
 
 export default router
