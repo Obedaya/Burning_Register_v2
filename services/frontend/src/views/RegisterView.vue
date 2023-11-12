@@ -193,6 +193,7 @@ export default {
     },
     changeView() {
       this.buttonPanelvisible = !this.buttonPanelvisible;
+      this.amountKeyboard = "";
     },
     setTotal(total) {
       this.total = total;
