@@ -5,30 +5,25 @@
         <v-form fast-fail @submit.prevent>
           <v-text-field label="Movie Name" v-model="tempMovieName"></v-text-field>
           <v-text-field label="Room" v-model="tempMovieRoom"></v-text-field>
-          <v-text-field label="Date and Time" v-model="tempMovieDatetime" :rules="movieDatetimeRule" :disabled="datetimeDisabled"></v-text-field>
+          <v-text-field label="Date and Time" v-model="tempMovieDatetime" :rules="movieDatetimeRule"
+            :disabled="datetimeDisabled"></v-text-field>
           <v-text-field label="Trailer" v-model="tempMovieTrailer"></v-text-field>
           <v-text-field label="Description" v-model="tempMovieDescription"></v-text-field>
           <v-text-field label="Language" v-model="tempMovieLanguage"></v-text-field>
           <v-text-field label="Poster" v-model="tempMoviePoster"></v-text-field>
           <v-text-field label="Stripe Payment" v-model="tempMovieStripePayment"></v-text-field>
-          
+
           <v-btn type="submit" color="primary" @click="submitMovie">Submit</v-btn>
           <v-btn color="error" @click="clearForm">Cancel</v-btn>
         </v-form>
       </v-sheet>
-  </v-dialog>
+    </v-dialog>
     <!-- Movie Selection Dropdown -->
     <v-row>
       <v-col>
         <!-- Movie Selection Dropdown -->
-        <v-select
-          v-model="selectedMovie"
-          :items="movies"
-          item-title="name"
-          item-value="_id"
-          label="Select a movie"
-          return-object
-        ></v-select>
+        <v-select v-model="selectedMovie" :items="movies" item-title="name" item-value="_id" label="Select a movie"
+          return-object></v-select>
       </v-col>
     </v-row>
 
@@ -50,16 +45,32 @@
       </v-col>
 
       <v-col cols="8">
-        <v-card class="overflow-y-auto" max-height="400">
+        <v-card class="overflow-y-auto" max-height="350">
           <v-card-title>Orders</v-card-title>
           <v-card-text>
             <v-list>
-              <v-list-item
-                v-for="(order, index) in orders"
-                :key="index"
-                @click="selectOrder(order)"
-                :class="{ 'order-selected': selectedOrder === order }"
-              >
+              <v-list-item v-for="(order, index) in orders" :key="index" @click="selectOrder(order)"
+                :class="{ 'order-selected': selectedOrder === order }">
+                <v-list-item-content>
+                  <v-list-item-title>{{
+                    order.timestamp
+                  }}</v-list-item-title>
+                  <v-list-item-subtitle>
+                    Total: {{ order.total }}
+                    IsTeam: {{ order.isteam }}
+                    Products: {{ printProducts(order) }}
+                    Canceled: {{ order.cancellation }}
+                  </v-list-item-subtitle>
+                </v-list-item-content>
+              </v-list-item>
+            </v-list>
+          </v-card-text>
+        </v-card>
+        <v-card class="overflow-y-auto" max-height="200">
+          <v-card-title>Cancelled Orders</v-card-title>
+          <v-card-text>
+            <v-list>
+              <v-list-item v-for="(order, index) in cancelled_orders" :key="index">
                 <v-list-item-content>
                   <v-list-item-title>{{
                     order.timestamp
@@ -89,7 +100,7 @@
   </v-container>
 </template>
   
-  <script>
+<script>
 import axios from "axios";
 import { useMovieStore } from "@/stores/movieStore";
 import { ref, watch } from "vue";
@@ -103,6 +114,7 @@ export default {
     return {
       movies: [],
       orders: [],
+      cancelled_orders: [],
       selectedOrder: null,
       formvisible: false,
       tempMovieName: "",
@@ -157,12 +169,27 @@ export default {
     getHistory() {
       // Implement logic to fetch order history from the backend
       axios
-        .get("/api/v1/history/?movie=" + this.selectedMovie.name, {
+        .get("/api/v1/history/?movie=" + this.selectedMovie.name + "&cancellation=false", {
           withCredentials: false, // Ensure credentials are not sent
         })
         .then((response) => {
           // Handle success
           this.orders = response.data;
+        })
+        .catch((error) => {
+          // Handle errors
+          console.log(error);
+        });
+    },
+    getHistoryCancelled() {
+      // Implement logic to fetch order history from the backend
+      axios
+        .get("/api/v1/history/?movie=" + this.selectedMovie.name + "&cancellation=true", {
+          withCredentials: false, // Ensure credentials are not sent
+        })
+        .then((response) => {
+          // Handle success
+          this.cancelled_orders = response.data;
         })
         .catch((error) => {
           // Handle errors
@@ -178,16 +205,16 @@ export default {
     },
     cancelSelectedOrder() {
       axios
-      .post("/api/v1/history/cancel/?_id=" + this.selectedOrder._id.toString(), {
-        withCredentials: false,
-      })
-      .then(() => {
-        this.getHistory();
-      })
-      .catch((error) => {
-        // Handle errors
-        console.log(error);
-      })
+        .post("/api/v1/history/cancel/?_id=" + this.selectedOrder._id.toString(), {
+          withCredentials: false,
+        })
+        .then(() => {
+          this.getHistory();
+        })
+        .catch((error) => {
+          // Handle errors
+          console.log(error);
+        })
     },
     submitMovie() {
       if (this.movieEditing) {
@@ -197,7 +224,7 @@ export default {
       }
       this.clearForm();
     },
-    clearForm(){
+    clearForm() {
       this.tempMovieName = "";
       this.tempMovieRoom = "";
       this.tempMovieDatetime = new Date().toISOString().slice(0, 19).replace('T', ' ');
@@ -233,7 +260,7 @@ export default {
           console.log(error);
         });
     },
-    editMovie(){
+    editMovie() {
       this.movieEditing = true;
       this.datetimeDisabled = true;
       let datetime = new Date(this.selectedMovie.datetime);
@@ -289,18 +316,21 @@ export default {
   created() {
     this.getMovies();
     this.getHistory();
+    this.getHistoryCancelled();
   },
   watch: {
     selectedMovie() {
       this.getHistory();
+      this.getHistoryCancelled();
     },
   },
 };
 </script>
   
-  <style scoped>
+<style scoped>
 .order-selected {
-  background-color: #ef605a; /* Apply a background color to selected orders */
+  background-color: #ef605a;
+  /* Apply a background color to selected orders */
 }
 </style>
   

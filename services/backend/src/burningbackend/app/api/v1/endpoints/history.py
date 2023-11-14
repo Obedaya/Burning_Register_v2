@@ -8,12 +8,18 @@ from fastapi import HTTPException
 router = APIRouter()
 
 @router.get("/", response_description="History retrieved")
-async def get_history(movie: str = None) -> list[History]:
+async def get_history(movie: str = None, cancellation: bool = False) -> list[History]:
     if movie is None:
-        history = await History.all().to_list()
+        if cancellation is False:
+            history = await History.find({"cancellation": False}).to_list()
+        else:
+            history = await History.find({"cancellation": True}).to_list()
         return history
     else:
-        history = await History.find({"movie": movie}).to_list()
+        if cancellation is False:
+            history = await History.find({"movie": movie, "cancellation": False}).to_list()
+        else:
+            history = await History.find({"movie": movie, "cancellation": True}).to_list()
         return history
 
 @router.post("/", response_description="History Item added to the database")
