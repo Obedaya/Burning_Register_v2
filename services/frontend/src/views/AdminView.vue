@@ -42,6 +42,7 @@
         </v-card>
         <v-btn @click="formvisible = true" color="primary">Add Movie</v-btn>
         <v-btn @click="editMovie" color="secondary" v-if="selectedMovie">Edit Movie</v-btn>
+        <v-btn @click="downloadReport" color="success">Download Report</v-btn>
       </v-col>
 
       <v-col cols="8">
@@ -151,6 +152,28 @@ export default {
     };
   },
   methods: {
+    downloadReport() {
+    axios
+      .get('/api/v1/report/report?movie=' + this.selectedMovie.name, { // Make sure to use the correct endpoint
+        responseType: 'blob', // Important for files
+        withCredentials: false
+      })
+      .then((response) => {
+        // Create a URL for the blob
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        // Create an anchor element and click it to download
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', this.selectedMovie.name + '.xlsx'); // or the filename from the response headers
+        document.body.appendChild(link);
+        link.click();
+        // Clean up and remove the link
+        link.parentNode.removeChild(link);
+      })
+      .catch((error) => {
+        console.error("There was an error downloading the report:", error);
+      });
+  },
     getMovies() {
       // Implement logic to fetch movies from the backend
       axios
