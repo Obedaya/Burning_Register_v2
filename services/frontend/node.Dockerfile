@@ -1,20 +1,14 @@
-# build stage
-FROM node AS build-stage
+# Build stage
+FROM oven/bun:latest as build-stage
 WORKDIR /app
-COPY package.json ./
-COPY bun.lockb ./
-COPY babel.config.js ./
-COPY jsconfig.json ./
-COPY vue.config.js ./
-COPY .eslintrc.js ./
+COPY package.json bun.lockb ./
+RUN bun install
+COPY . .
+RUN bun run build 
 
-RUN npm install --legacy-peer-deps
-COPY src ./src
-RUN npm run build
-
-# production stage
-
-FROM nginx:stable-alpine as production-stage
+# Production stage
+FROM nginx:stable-alpine
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=build-stage /app/dist /usr/share/nginx/html
+EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
