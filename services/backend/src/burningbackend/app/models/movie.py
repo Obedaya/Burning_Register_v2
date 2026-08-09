@@ -17,6 +17,7 @@ class Movie(Document):
     language: Optional[str] = None
     poster: Optional[str] = None
     stripe_payment: Optional[str] = None
+    hidden: bool = False
 
     class Settings:
         name = "movies"
@@ -31,3 +32,4 @@ class UpdateMovie(BaseModel):
     language: Optional[str] = None
     poster: Optional[str] = None
     stripe_payment: Optional[str] = None
+    hidden: Optional[bool] = None
