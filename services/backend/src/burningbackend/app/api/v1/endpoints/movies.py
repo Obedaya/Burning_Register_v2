@@ -15,7 +15,13 @@ async def add_movie(movie: Movie) -> dict:
 
 @router.get("/", response_description="Movies retrieved")
 async def get_movies() -> list[Movie]:
-    movies = await Movie.all().to_list()
+    # Only return movies that are not hidden
+    movies = await Movie.find({"hidden": False}).to_list()
+    return movies
+
+@router.get("/all", response_description="All movies retrieved")
+async def get_all_movies() -> list[Movie]:
+    movies = await Movie.find().to_list()
     return movies
 
 
