@@ -5,6 +5,7 @@ services:
     build:
       context: ./services/frontend
       dockerfile: dev.Dockerfile
+    restart: always
     ports:
       - 8080:5173
     depends_on:
