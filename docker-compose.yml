@@ -7,6 +7,8 @@ services:
       dockerfile: node.Dockerfile
     env_file:
       - .env
+    ports:
+      - "8080:80"
 
   backend:
     build:
@@ -14,6 +16,8 @@ services:
     restart: always
     env_file:
       - .env
+    ports:
+      - "9090:9090"
 
 ## Only enable this if you want to use a local mongodb instance
 #  db:  # This service name will be also used as hostname for MONGODB_URI
@@ -30,7 +34,7 @@ services:
     restart: unless-stopped
     command: tunnel run
     env_file:
-      - .env
+       - .env
 
 ## Only enable this if you want to use a local mongodb instance
 # volumes:

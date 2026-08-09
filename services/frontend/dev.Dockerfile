@@ -1,9 +1,7 @@
-# build stage
 FROM oven/bun:latest
 WORKDIR /app
-COPY package.json ./
-COPY bun.lockb ./
-
+COPY package.json bun.lockb ./
 RUN bun install
 COPY . .
-CMD ["bun", "run", "serve"]
+EXPOSE 5173
+CMD ["bun", "run", "dev", "--", "--host", "0.0.0.0"]

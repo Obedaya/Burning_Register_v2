@@ -10,7 +10,8 @@ loadFonts()
 
 const pinia = createPinia()
 
-const apiEndpoint = process.env.VUE_APP_DB_ADDRESS;
+const processEnv = typeof process !== 'undefined' ? process.env : {};
+const apiEndpoint = import.meta.env.VITE_DB_ADDRESS || processEnv.VUE_APP_DB_ADDRESS || '';
 
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = apiEndpoint;  // the FastAPI backend

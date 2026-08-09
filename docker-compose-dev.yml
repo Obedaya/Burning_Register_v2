@@ -6,11 +6,11 @@ services:
       context: ./services/frontend
       dockerfile: dev.Dockerfile
     ports:
-      - 8080:8080
+      - 8080:5173
     depends_on:
       - backend
     environment:
-      - VUE_APP_DB_ADDRESS=http://localhost:9090
+      - VITE_DB_ADDRESS=http://localhost:9090
 
   backend:
     build:
@@ -19,7 +19,7 @@ services:
     depends_on:
       - db
     ports:
-      - 9090:8080
+      - 9090:9090
     env_file:
       - .env
 
