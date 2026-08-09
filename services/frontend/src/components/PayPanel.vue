@@ -4,16 +4,16 @@
       <v-col cols="6">
         <v-row>
           <v-col cols="3">
-            <v-img src="@/assets/5.jpg" @click="handleButtonClick(5)"></v-img>
+            <v-img src="/assets/5.jpg" @click="handleButtonClick(5)"></v-img>
           </v-col>
           <v-col cols="3">
-            <v-img src="@/assets/10.jpg" @click="handleButtonClick(10)"></v-img>
+            <v-img src="/assets/10.jpg" @click="handleButtonClick(10)"></v-img>
           </v-col>
           <v-col cols="3">
-            <v-img src="@/assets/20.jpg" @click="handleButtonClick(20)"></v-img>
+            <v-img src="/assets/20.jpg" @click="handleButtonClick(20)"></v-img>
           </v-col>
           <v-col cols="3">
-            <v-img src="@/assets/50.jpg" @click="handleButtonClick(50)"></v-img>
+            <v-img src="/assets/50.jpg" @click="handleButtonClick(50)"></v-img>
           </v-col>
         </v-row>
       </v-col>

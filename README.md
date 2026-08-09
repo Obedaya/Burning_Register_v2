@@ -29,7 +29,12 @@ VUE_APP_DB_ADDRESS='http://[YOUR IP]:9090'
 
 ## Usage
 
-Run the docker-compose file
+Development
 ```
-docker-compose up -d
+docker-compose -f docker-compose-dev.yml up --build -d
+```
+
+Production
+```
+docker-compose up --build -d
 ```

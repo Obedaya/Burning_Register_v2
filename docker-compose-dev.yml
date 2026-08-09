@@ -17,23 +17,21 @@ services:
     build:
       context: ./services/backend
     restart: always
-    depends_on:
-      - db
     ports:
       - 9090:9090
     env_file:
       - .env
 
 # Only enable this if you want to use a local mongodb instance
-  db:  # This service name will be also used as hostname for MONGODB_URI
-    image: mongo:7.0.2
-    restart: always
-    env_file:
-      - .env
-    volumes:
-      - mongodb-data:/data/db
+  # db:  # This service name will be also used as hostname for MONGODB_URI
+  #   image: mongo:7.0.2
+  #   restart: always
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - mongodb-data:/data/db
     
 
 # Only enable this if you want to use a local mongodb instance
-volumes:
-  mongodb-data:
+# volumes:
+#   mongodb-data:
