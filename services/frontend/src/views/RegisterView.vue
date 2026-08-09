@@ -1,7 +1,7 @@
 <template>
-  <v-container fluid>
-    <v-row>
-      <v-col>
+  <v-container fluid class="pa-4 pa-md-6">
+    <v-row dense class="mb-4">
+      <v-col cols="12" md="8">
         <v-select
           v-model="selectedMovie"
           :items="movies"
@@ -9,7 +9,36 @@
           item-value="_id"
           label="Select a movie"
           return-object
-        ></v-select>
+          prepend-inner-icon="mdi-movie-open"
+          hide-details
+          class="movie-select"
+        />
+      </v-col>
+      <v-col cols="12" md="4" class="d-flex align-center">
+        <v-chip
+          v-if="selectedMovie"
+          color="secondary"
+          variant="tonal"
+          size="small"
+          class="mr-2"
+        >
+          <v-icon start size="14">mdi-door</v-icon>
+          {{ selectedMovie.room }}
+        </v-chip>
+        <v-chip
+          v-if="selectedMovie"
+          color="info"
+          variant="tonal"
+          size="small"
+        >
+          <v-icon start size="14">mdi-calendar</v-icon>
+          {{ formatDate(selectedMovie.datetime) }}
+        </v-chip>
+      </v-col>
+    </v-row>
+
+    <v-row>
+      <v-col cols="12" md="7" lg="8">
         <ButtonPanel
           :products="products"
           @addItem="addItem"
@@ -21,12 +50,21 @@
           :amountKeyboard="amountKeyboard"
           :movieselected="selectedMovie !== null"
           @checkout="checkout"
+          @goBack="changeView"
           v-else
         />
       </v-col>
-    </v-row>
-    <v-row>
-      <v-col>
+
+      <v-col cols="12" md="5" lg="4">
+        <RegisterCart
+          ref="registerCart"
+          :amountKeyboard="amountKeyboard"
+          :productsinCart="productsinCart"
+          :isteam="isteam"
+          @selectProduct="selectProduct"
+          @total="setTotal"
+          class="mb-3"
+        />
         <RegisterKeypad
           @keyboard="keyboardValue"
           @clearCart="clearCart"
@@ -35,23 +73,17 @@
           @deleteFromCart="deleteFromCart"
           @increaseProductAmount="increaseProductAmount"
           @decreaseProductAmount="decreaseProductAmount"
-        />
-      </v-col>
-      <v-col>
-        <RegisterCart
-          ref="registerCart"
-          :amountKeyboard="amountKeyboard"
-          :productsinCart="productsinCart"
-          :isteam="isteam"
-          @selectProduct="selectProduct"
-          @total="setTotal"
+          :isTeamActive="isteam"
+          v-if="buttonPanelvisible"
         />
       </v-col>
     </v-row>
+
+    <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="2000" location="bottom right">
+      {{ snackbarText }}
+    </v-snackbar>
   </v-container>
 </template>
-
-
 
 <script>
 import ButtonPanel from "../components/ButtonPanel.vue";
@@ -73,6 +105,9 @@ export default {
       total: 0,
       movies: [],
       selectedProduct: null,
+      snackbar: false,
+      snackbarText: "",
+      snackbarColor: "success",
     };
   },
   mounted() {
@@ -81,44 +116,22 @@ export default {
   },
   setup() {
     const movieStore = useMovieStore();
-
-    // Initialize selectedMovie with the value from the store
     const selectedMovie = ref(movieStore.selectedMovie);
 
     watch(selectedMovie, (newVal) => {
       movieStore.selectMovie(newVal);
     });
 
-    return {
-      selectedMovie,
-    };
+    return { selectedMovie };
   },
-
-  components: {
-    ButtonPanel,
-    RegisterCart,
-    RegisterKeypad,
-    PayPanel,
-  },
+  components: { ButtonPanel, RegisterCart, RegisterKeypad, PayPanel },
   methods: {
     getproducts() {
       axios
-        .get("/api/v1/inventory/", {
-          withCredentials: false, // Ensure credentials are not sent
-        })
-        .then((response) => {
-          // Handle success
-          this.products = response.data;
-        })
-        .catch((error) => {
-          // Handle errors
-          console.log(error);
-        });
+        .get("/api/v1/inventory/", { withCredentials: false })
+        .then((response) => { this.products = response.data; })
+        .catch((error) => { console.log(error); });
     },
-    selectCategory(items) {
-      this.productsinCart = items;
-    },
-    // Handle keypad input
     keyboardValue(keyboardValue) {
       if (keyboardValue === "delete") {
         this.amountKeyboard = this.amountKeyboard.toString().slice(0, -1);
@@ -128,12 +141,9 @@ export default {
         this.amountKeyboard += keyboardValue;
       }
       this.amountKeyboard = this.amountKeyboard.toString();
-      // Remove trailing dot
       this.amountKeyboard = this.amountKeyboard.replace(/\.$/, "");
-      // Remove leading zeros
       this.amountKeyboard = this.amountKeyboard.replace(/^0+(?=\d)/, "");
     },
-    // Add item to cart
     addItem(item) {
       const product = this.productsinCart.find((p) => p.name === item.name);
       if (this.amountKeyboard === "") {
@@ -151,7 +161,6 @@ export default {
           category: item.category,
         });
       }
-      // Automatically add Pfand if category is DRINK and item added is not Pfand
       if (item.category === "Drinks" && item.name !== "Pfand" && !this.isteam) {
         this.addItem(this.products.find((p) => p.name === "Pfand"));
       }
@@ -167,7 +176,6 @@ export default {
           product.price = this.products.find(
             (p) => p.name === product.name
           ).price;
-          // Add Pfand for every item amount in category Drinks
           if (product.category === "Drinks") {
             this.amountKeyboard = product.amount;
             this.addItem(this.products.find((p) => p.name === "Pfand"));
@@ -181,7 +189,6 @@ export default {
           ).price_team;
         });
         this.productsinCart.forEach((product) => {
-          // Remove Pfand from cart if Team is toggled on
           if (product.name === "Pfand") {
             this.productsinCart.splice(
               this.productsinCart.findIndex((p) => p.name === "Pfand"),
@@ -192,15 +199,23 @@ export default {
       }
     },
     changeView() {
+      if (this.buttonPanelvisible) {
+        if (!this.selectedMovie) {
+          this.showSnackbar("Please select a movie first", "warning");
+          return;
+        }
+        if (this.productsinCart.length === 0) {
+          this.showSnackbar("Cart is empty — add items first", "warning");
+          return;
+        }
+      }
       this.buttonPanelvisible = !this.buttonPanelvisible;
       this.amountKeyboard = "";
     },
     setTotal(total) {
       this.total = total;
     },
-    // Checkout, clear cart and reset amountKeyboard
     checkout() {
-      // Create new dictionary with selected movie, timestamp, list of products and total price
       const order = {
         timestamp: new Date().toISOString(),
         total: this.total,
@@ -210,15 +225,12 @@ export default {
         products: this.productsinCart,
       };
       axios
-        .post("/api/v1/history/", order, {
-          withCredentials: false, // Ensure credentials are not sent
-        })
-        .then((response) => {
-          // Handle success
-          console.log(response.data);
+        .post("/api/v1/history/", order, { withCredentials: false })
+        .then(() => {
+          this.showSnackbar("Order placed successfully!", "success");
         })
         .catch((error) => {
-          // Handle errors
+          this.showSnackbar("Failed to place order", "error");
           console.log(error);
         });
       this.clearCart();
@@ -228,19 +240,10 @@ export default {
       this.changeView();
     },
     getMovies() {
-      // Implement logic to fetch movies from the backend
       axios
-        .get("/api/v1/movies/", {
-          withCredentials: false, // Ensure credentials are not sent
-        })
-        .then((response) => {
-          // Handle success
-          this.movies = response.data;
-        })
-        .catch((error) => {
-          // Handle errors
-          console.log(error);
-        });
+        .get("/api/v1/movies/", { withCredentials: false })
+        .then((response) => { this.movies = response.data; })
+        .catch((error) => { console.log(error); });
     },
     selectProduct(product) {
       this.selectedProduct = product;
@@ -269,17 +272,15 @@ export default {
           this.selectedProduct.name !== "Pfand" &&
           !this.isteam
         ) {
-          // Check if Pfand is in cart
-          if (this.productsinCart) {
-            this.productsinCart.find((p) => p.name === "Pfand").amount -= 1;
-          }
-          if (
-            this.productsinCart.find((p) => p.name === "Pfand").amount === 0
-          ) {
-            this.productsinCart.splice(
-              this.productsinCart.findIndex((p) => p.name === "Pfand"),
-              1
-            );
+          const pfand = this.productsinCart.find((p) => p.name === "Pfand");
+          if (pfand) {
+            pfand.amount -= 1;
+            if (pfand.amount === 0) {
+              this.productsinCart.splice(
+                this.productsinCart.findIndex((p) => p.name === "Pfand"),
+                1
+              );
+            }
           }
         }
         this.selectedProduct.amount -= 1;
@@ -288,14 +289,22 @@ export default {
         }
       }
     },
+    showSnackbar(text, color) {
+      this.snackbarText = text;
+      this.snackbarColor = color;
+      this.snackbar = true;
+    },
+    formatDate(datetime) {
+      if (!datetime) return '';
+      const d = new Date(datetime);
+      return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    },
   },
 };
 </script>
 
-<style>
-.v-btn {
-  margin: 5px;
-  padding: 5px;
-  width: 98%;
+<style scoped>
+.movie-select {
+  max-width: 100%;
 }
 </style>

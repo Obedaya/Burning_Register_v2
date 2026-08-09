@@ -1,33 +1,61 @@
 <template>
-    <v-navigation-drawer
-        expand-on-hover
-        rail
-        permanent
-    >
-        <v-list>
-        <v-list-item title="Burning Register">
-            <template v-slot:prepend>
-                <v-avatar> <v-img src="@/assets/burning_cinema_logo.svg" width=""></v-img> </v-avatar>
-            </template>
-        </v-list-item>
-        </v-list>
+  <v-navigation-drawer
+    expand-on-hover
+    rail
+    permanent
+    color="surface"
+    class="nav-drawer"
+  >
+    <v-list>
+      <v-list-item class="py-3">
+        <template v-slot:prepend>
+          <v-avatar color="primary" size="40">
+            <v-icon>mdi-fire</v-icon>
+          </v-avatar>
+        </template>
+        <v-list-item-title class="text-h6 font-weight-bold">
+          Burning Register
+        </v-list-item-title>
+      </v-list-item>
+    </v-list>
 
-        <v-divider></v-divider>
+    <v-divider class="mx-3 my-1" />
 
-        <v-list density="compact" nav>
-        <v-list-item prepend-icon="mdi-cash-register" title="Register" value="register" to="/"></v-list-item>
-        <v-list-item prepend-icon="mdi-chart-line" title="Statistic" value="statistics" to="/statistics"></v-list-item>
-        <v-list-item prepend-icon="mdi-account-cog" title="Admin" value="admin" to="/admin"></v-list-item>
-        </v-list>
-    </v-navigation-drawer>
-
-  </template>
+    <v-list density="comfortable" nav class="px-2">
+      <v-list-item
+        prepend-icon="mdi-cash-register"
+        title="Register"
+        value="register"
+        to="/"
+        rounded="lg"
+        class="my-1"
+      />
+      <v-list-item
+        prepend-icon="mdi-chart-bar"
+        title="Statistics"
+        value="statistics"
+        to="/statistics"
+        rounded="lg"
+        class="my-1"
+      />
+      <v-list-item
+        prepend-icon="mdi-cog"
+        title="Admin"
+        value="admin"
+        to="/admin"
+        rounded="lg"
+        class="my-1"
+      />
+    </v-list>
+  </v-navigation-drawer>
+</template>
 
 <script>
-export default {
-}
+export default {}
 </script>
 
-<style>
-
+<style scoped>
+.nav-drawer {
+  border-right: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
 </style>

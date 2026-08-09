@@ -1,4 +1,5 @@
 from burningbackend.app.models.history import History
+from burningbackend.app.models.inventory import Inventory
 
 from bson.objectid import ObjectId
 
@@ -6,6 +7,23 @@ from fastapi import APIRouter
 from fastapi import HTTPException
 
 router = APIRouter()
+
+
+async def _update_inventory_for_order(products, reverse=False):
+    """Update inventory amounts when an order is placed or cancelled.
+    If reverse=True, restores inventory (for cancellations).
+    """
+    for product in products:
+        inv_item = await Inventory.find_one({"name": product.name})
+        if inv_item:
+            if reverse:
+                inv_item.amount += product.amount
+                inv_item.amount_sold -= product.amount
+            else:
+                inv_item.amount -= product.amount
+                inv_item.amount_sold += product.amount
+            await inv_item.save()
+
 
 @router.get("/", response_description="History retrieved")
 async def get_history(movie: str = None, cancellation: bool = False) -> list[History]:
@@ -22,14 +40,17 @@ async def get_history(movie: str = None, cancellation: bool = False) -> list[His
             history = await History.find({"movie": movie, "cancellation": True}).to_list()
         return history
 
+
 @router.post("/", response_description="History Item added to the database")
 async def add_history(history: History) -> dict:
     await history.create()
+    await _update_inventory_for_order(history.products, reverse=False)
     history = await History.find_one({"timestamp": history.timestamp})
     return {"message": "History added successfully", "data": history}
 
+
 @router.post("/cancel/", response_description="Canceled booked order")
-async def add_history(_id: str, cancellation: bool = True) -> dict:
+async def cancel_history(_id: str, cancellation: bool = True) -> dict:
     id = ObjectId(_id)
     history = await History.get(id)
     if not history:
@@ -37,11 +58,16 @@ async def add_history(_id: str, cancellation: bool = True) -> dict:
             status_code=404,
             detail="History record not found"
         )
+    if history.cancellation != cancellation:
+        if cancellation:
+            await _update_inventory_for_order(history.products, reverse=True)
+        else:
+            await _update_inventory_for_order(history.products, reverse=False)
     history.cancellation = cancellation
     await history.save()
     return {"message": "History updated successfully", "data": history}
 
-# Get total of all not cancelled histories for specific movie
+
 @router.get("/total", response_description="Total of all histories for specific movie")
 async def get_total(movie: str, isteam: bool = False, cancellation: bool = False, pfand: bool = True) -> float:
     if cancellation is False:
@@ -61,7 +87,7 @@ async def get_total(movie: str, isteam: bool = False, cancellation: bool = False
                     total -= j.price * j.amount
     return float(total)
 
-# Get total amount of Tickets sold for specific movie
+
 @router.get("/tickets", response_description="Total of all tickets for specific movie")
 async def get_tickets(movie: str, isteam: bool = False, freeticket: bool = False) -> int:
     if isteam is True:
